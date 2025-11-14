@@ -1,0 +1,5 @@
+langchain
+langchain-community 
+pypdf
+chromadb
+psycopg2-binary  # Driver para PostgreSQL
