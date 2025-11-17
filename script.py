@@ -30,7 +30,7 @@ def get_db_connection():
         )
         return conn
     except psycopg2.Error as e:
-        print(f"❌ Erro de Conexão com o Banco: {e}")
+        print(f" Erro de Conexão com o Banco: {e}")
         return None
 
 def get_embedding(text):
@@ -43,7 +43,7 @@ def get_embedding(text):
         response.raise_for_status()
         return response.json()['embedding']
     except Exception as e:
-        print(f"❌ Erro ao vetorizar: {e}")
+        print(f" Erro ao vetorizar: {e}")
         return None
 
 def find_relevant_rules(pergunta_vetor, conn, top_k=6):
@@ -70,7 +70,7 @@ def ask_ollama(pergunta, contexto):
 
     print(f"\n[DEBUG - O QUE O BANCO ENCONTROU]:\n{contexto_str}\n")
     print("="*50)
-    print("🤖 RESPOSTA DA IA (Escrevendo...):")
+    print(" RESPOSTA DA IA (Escrevendo...):")
     print("="*50)
     
     prompt_completo = f"""Você é um assistente especialista no manual do DETRAN-PE.
@@ -127,7 +127,7 @@ def main():
         return
 
     pergunta = sys.argv[1]
-    print(f"🔍 Analisando pergunta: '{pergunta}'...")
+    print(f" Analisando pergunta: '{pergunta}'...")
 
     conn = get_db_connection()
     if not conn: return
@@ -139,10 +139,10 @@ def main():
     # 2. Buscar (RAG)
     contexto = find_relevant_rules(vetor, conn)
     if not contexto:
-        print("⚠️ Nenhuma regra relevante encontrada no banco.")
+        print(" Nenhuma regra relevante encontrada no banco.")
         return
     
-    print(f"📚 Regras recuperadas: {len(contexto)}")
+    print(f" Regras recuperadas: {len(contexto)}")
 
     # 3. Gerar Resposta
     ask_ollama(pergunta, contexto)
