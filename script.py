@@ -7,7 +7,7 @@ import pgvector.psycopg2
 
 db_name = "DetranNormas"
 db_user = "Ollama_trainer"
-db_pass = "123456"
+db_pass = "password"
 db_host = "localhost"
 db_port = "5432"
 
