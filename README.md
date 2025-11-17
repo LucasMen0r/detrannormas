@@ -54,7 +54,7 @@ sudo -u postgres psql -d detrannormas -c "CREATE EXTENSION IF NOT EXISTS vector;
 
 # 4. Restaure o backup completo (MUITO IMPORTANTE)
 # Isso carrega as regras E os vetores, pulando a indexação.
-psql -h localhost -U ollama_trainer -d detrannormas < banco_completo.sql
+psql -h localhost -U ollama_trainer -d detrannormas <setup_inicial.sql
 ```
 *(Se preferir criar as tabelas do zero, use o `setup_inicial.sql` e depois rode o `indexar_banco.py`)*
 
