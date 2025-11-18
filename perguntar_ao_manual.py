@@ -77,7 +77,7 @@ Pergunta: {pergunta}
 
 Resposta:"""
     try:
-        response = requests.post(
+        resposta = requests.post(
             ollama_api_chat,
             json={
                 "model": ollama_chat_model,
@@ -89,10 +89,10 @@ Resposta:"""
             },
             stream=True
         )
-        response.raise_for_status()
+        resposta.raise_for_status()
         resposta_completa = ""
 
-        for line in response.iter_lines():
+        for line in resposta.iter_lines():
             if line:
                 try:
                     json_data = json.loads(line.decode('utf-8'))
