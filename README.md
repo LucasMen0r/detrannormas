@@ -150,8 +150,6 @@ python3 indexar_banco.py
 ├── .gitignore             # Ignora arquivos de ambiente (ex: /testedbdetran)
 ├── README.md              # Este arquivo
 ├── requirements.txt       # Bibliotecas Python (psycopg2, requests, pgvector)
-├──
-├── banco_completo.sql     # 🌟 BACKUP PRINCIPAL (Tabelas + Regras + Vetores)
 ├── setup_inicial.sql      # Script "limpo" para criar o schema e inserir regras (sem vetores)
 └── perguntar_ao_manual.py   # Script principal para fazer perguntas ao RAG
 ```
