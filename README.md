@@ -153,7 +153,5 @@ python3 indexar_banco.py
 ├──
 ├── banco_completo.sql     # 🌟 BACKUP PRINCIPAL (Tabelas + Regras + Vetores)
 ├── setup_inicial.sql      # Script "limpo" para criar o schema e inserir regras (sem vetores)
-├──
-├── indexar_banco.py       # Script para ler o banco e gerar os vetores
 └── perguntar_ao_manual.py   # Script principal para fazer perguntas ao RAG
 ```
