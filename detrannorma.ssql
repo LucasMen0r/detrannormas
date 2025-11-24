@@ -3,18 +3,15 @@
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- 2. CRIAÇÃO DAS TABELAS (SCHEMA)
-
 -- Categorias e Objetos
 CREATE TABLE IF NOT EXISTS categorias_regras (
     id_categoria SERIAL PRIMARY KEY,
     nome_categoria VARCHAR(100) NOT NULL UNIQUE
 );
-
 CREATE TABLE IF NOT EXISTS objetos_db (
     id_objeto SERIAL PRIMARY KEY,
     nome_objeto VARCHAR(100) NOT NULL UNIQUE
 );
-
 -- Tabela Principal de Regras
 CREATE TABLE IF NOT EXISTS regras_nomenclatura (
     id_regra SERIAL PRIMARY KEY,
@@ -27,7 +24,6 @@ CREATE TABLE IF NOT EXISTS regras_nomenclatura (
     fonte_pagina INT,
     embedding vector(768) -- Coluna onde o Python salvará os vetores
 );
-
 -- Tabelas Auxiliares
 CREATE TABLE IF NOT EXISTS tipos_dados (
     id_tipo_dado SERIAL PRIMARY KEY,
@@ -36,22 +32,18 @@ CREATE TABLE IF NOT EXISTS tipos_dados (
     faixa_valores VARCHAR(255),
     espaco_ocupado VARCHAR(50)
 );
-
 CREATE TABLE IF NOT EXISTS atributos_comuns (
     id_atributo SERIAL PRIMARY KEY,
     atributo VARCHAR(100) NOT NULL,
     tipo_dado_recomendado VARCHAR(100)
 );
-
 -- 3. INSERÇÃO DOS DADOS (POPULAÇÃO)
-
 -- Inserindo Categorias e Objetos Básicos
 INSERT INTO categorias_regras (nome_categoria) VALUES ('Regras Gerais'), ('Nomenclatura de Objetos'), ('Boas Práticas'), ('Tipos de Dados'), ('Atributos Comuns') ON CONFLICT DO NOTHING;
 INSERT INTO objetos_db (nome_objeto) VALUES ('Banco'), ('Tabela'), ('Tabela Log'), ('Tabela Temp'), ('Tabela "z"'), ('Proxy Table'), ('Coluna'), ('PK (Primary Key)'), ('FK (Foreign Key)'), ('Unique'), ('Check'), ('View comum'), ('View materializada'), ('Índice'), ('Procedure'), ('Trigger') ON CONFLICT DO NOTHING;
 
 -- Limpeza preventiva
 TRUNCATE TABLE regras_nomenclatura RESTART IDENTITY CASCADE;
-
 -- >>> REGRAS GERAIS
 INSERT INTO regras_nomenclatura (id_categoria, id_objeto, descricao_regra, contexto_adicional, fonte_pagina) VALUES
 ( (SELECT id_categoria FROM categorias_regras WHERE nome_categoria = 'Regras Gerais'), NULL, 'Usar apenas letras (A-Z, a-z), números (0-9) e _ (underline).', 'Caracteres permitidos', 4),
@@ -66,7 +58,7 @@ INSERT INTO regras_nomenclatura (id_categoria, id_objeto, descricao_regra, conte
 ( (SELECT id_categoria FROM categorias_regras WHERE nome_categoria = 'Regras Gerais'), NULL, 'Não usar apenas números, verbos ou nomes próprios.', 'Restrições', 4),
 ( (SELECT id_categoria FROM categorias_regras WHERE nome_categoria = 'Regras Gerais'), NULL, 'Siglas oficiais: primeira letra maiúscula e demais minúsculas.', 'Ex.: Ipva, Cnh', 4);
 
--- >>> REGRAS DE OBJETOS (Com a correção da FK incluída!)
+-- >>> REGRAS DE OBJETOS
 INSERT INTO regras_nomenclatura (id_categoria, id_objeto, descricao_regra, padrao_sintaxe, exemplo, fonte_pagina) VALUES
 -- Banco e Tabelas
 ( (SELECT id_categoria FROM categorias_regras WHERE nome_categoria = 'Nomenclatura de Objetos'), (SELECT id_objeto FROM objetos_db WHERE nome_objeto = 'Banco'), 'O nome do banco deve identificar o negócio ou a sigla da aplicação.', 'db + área (até 5 posições) + seq', 'dbhbio01, dbhpop01', 6),
@@ -80,7 +72,7 @@ INSERT INTO regras_nomenclatura (id_categoria, id_objeto, descricao_regra, padra
 ( (SELECT id_categoria FROM categorias_regras WHERE nome_categoria = 'Nomenclatura de Objetos'), (SELECT id_objeto FROM objetos_db WHERE nome_objeto = 'Coluna'), 'Prefixo minúsculo indicando o tipo, seguido do nome PascalCase.', 'tipo + NomeColuna', 'nValorPagar, nCpf, sChassi', 8),
 ( (SELECT id_categoria FROM categorias_regras WHERE nome_categoria = 'Nomenclatura de Objetos'), (SELECT id_objeto FROM objetos_db WHERE nome_objeto = 'Coluna'), 'Colunas usadas como parâmetro em procedures externas iniciam com underline.', '_ + NomeColuna', '_sNome, _Nome', 9),
 
--- Constraints (Incluindo FK!)
+-- Constraints 
 ( (SELECT id_categoria FROM categorias_regras WHERE nome_categoria = 'Nomenclatura de Objetos'), (SELECT id_objeto FROM objetos_db WHERE nome_objeto = 'PK (Primary Key)'), 'Chave primária natural ou sequencial.', 'pk + Nome Tabela', 'pkVeiculo, pkFeriado', 10),
 ( (SELECT id_categoria FROM categorias_regras WHERE nome_categoria = 'Nomenclatura de Objetos'), (SELECT id_objeto FROM objetos_db WHERE nome_objeto = 'FK (Foreign Key)'), 'Padrão para Foreign Key (FK): Usar o prefixo fk mais os nomes das tabelas filha e pai.', 'fk + TabelaFilha + TabelaPai', 'fkProcessoUsuario', 11),
 ( (SELECT id_categoria FROM categorias_regras WHERE nome_categoria = 'Nomenclatura de Objetos'), (SELECT id_objeto FROM objetos_db WHERE nome_objeto = 'Unique'), 'Restrição de unicidade.', 'u + NomeTabela + Coluna', 'uUsuarioEmail', 11),
