@@ -1,4 +1,4 @@
-# Projeto RAG - Manual DETRAN-PE (Consulta Local com IA)
+a# Projeto RAG - Manual DETRAN-PE (Consulta Local com IA)
 
 ![Status](https://img.shields.io/badge/status-Prova%20de%20Conceito%20(PoC)-green)
 
@@ -149,7 +149,7 @@ python3 indexar_banco.py
 .
 ├── .gitignore             # Ignora arquivos de ambiente (ex: /testedbdetran)
 ├── README.md              # Este arquivo
-├── requirements.txt       # Bibliotecas Python (psycopg2, requests, pgvector)
-├── setup_inicial.sql      # Script "limpo" para criar o schema e inserir regras (sem vetores)
+├── requirements.txt       # Bibliotecas Python 
+├── detrannormas.sql      # Script "limpo" para criar o schema e inserir regras (sem vetores)
 └── perguntar_ao_manual.py   # Script principal para fazer perguntas ao RAG
 ```
