@@ -5,16 +5,17 @@ import sys
 import json
 import pgvector.psycopg2
 
-db_name = "DetranNormas"
-db_user = "Ollama_trainer"
-db_pass = "password"
-db_host = "localhost"
-db_port = "5432"
+db_name = 'detrannormas'
+db_user = 'postgres'
+db_pass = 'psswrd'
+db_host = '172.30.151.166'
+db_port = '5432'
 
 ollama_chat_model = "qwen2.5:1.5b"
-ollama_embed_model = "nomic-embed-text"
-ollama_api_embed = "http://localhost:11434/api/embeddings"
-ollama_api_chat = "http://localhost:11434/api/chat"
+ollama_embed_model = "nomic-embed-text:latest"
+ollama_base_url = f"http://{db_host}:11434"
+ollama_api_embed = f"{ollama_base_url}/api/embeddings"
+ollama_api_chat = f"{ollama_base_url}/api/chat"
 
 def conectadb():
     """conexão com o Postgre SQL"""
@@ -26,6 +27,7 @@ def conectadb():
             host=db_host,
             port=db_port,
         )
+        print(conn)
         return conn
     except psycopg2.Error as e:
         print(f"Erro de Conexão com o Banco: {e}")
@@ -74,7 +76,6 @@ Contexto:
 {contexto_str}
 
 Pergunta: {pergunta}
-
 Resposta:"""
     try:
         resposta = requests.post(
@@ -111,7 +112,7 @@ Resposta:"""
 
 def main():
     if len(sys.argv) < 2:
-        print('Uso correto: python3 perguntar_ao_manual.py "Sua pergunta entre aspas"')
+        print('Uso correto: python perguntar_ao_manual.py "Sua pergunta entre aspas"')
         return
     pergunta = sys.argv[1]
 
