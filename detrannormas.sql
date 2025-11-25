@@ -124,3 +124,8 @@ INSERT INTO atributos_comuns (atributo, tipo_dado_recomendado) VALUES
 ('CGC', 'Char(14)'),
 ('CPF', 'Char(11)'),
 ('Login', 'Varchar(30)');
+
+CREATE USER Ollama_trainer WITH PASSWORD 'senha';
+GRANT ALL PRIVILEGES ON DATABASE detrannormas TO Ollama_trainer;
+
+CREATE INDEX ON regras_nomenclatura USING hnsw (embedding vector_cosine_ops);
