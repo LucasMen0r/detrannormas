@@ -9,7 +9,7 @@ from datetime import datetime
 db_name = 'detrannormas'
 db_user = 'postgres'
 db_pass = 'psswrd'
-db_host = '172.30.151.166'
+db_host = 'ip'
 db_port = '5432'
 
 ollama_chat_model = "qwen2.5:1.5b"
