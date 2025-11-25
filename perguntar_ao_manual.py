@@ -4,6 +4,7 @@ import requests
 import sys
 import json
 import pgvector.psycopg2
+from datetime import datetime
 
 db_name = 'detrannormas'
 db_user = 'postgres'
@@ -110,29 +111,111 @@ Resposta:"""
     except Exception as e:
         return f"\n Erro técnico: {e}"
 
+def classificarpergunta(pergunta):
+    """
+    Agente Vertical: Classifica a intenção técnica do desenvolvedor.
+    """
+    # Mapeamento exato das categorias do seu INSERT INTO categorias_regras
+    prompt_classificador = f"""
+    Você é um Tech Lead sênior do Detran.
+    Classifique a pergunta técnica do desenvolvedor em uma das categorias abaixo.
+    
+    CATEGORIAS DISPONÍVEIS:
+    - 'Nomenclatura de Objetos': Dúvidas sobre nomes de tabelas, colunas, prefixos (tb, vw, pk), sufixos.
+    - 'Boas Práticas': Dúvidas sobre performance, uso de JOINs, cursores, procedures, integridade.
+    - 'Tipos de Dados': Dúvidas sobre int, varchar, numeric, tamanhos de colunas.
+    - 'Regras Gerais': Formatação, uso de acentos, caracteres especiais, maiúsculas/minúsculas.
+    
+    Pergunta: "{pergunta}"
+    
+    Responda APENAS com o nome exato da categoria (ex: Nomenclatura de Objetos).
+    Caso não se encaixe, responda: GERAL
+    """
+    try:
+        resposta = requests.post(
+            ollama_api_chat,
+            json={
+                "model =": ollama_chat_model,
+                "mensagem =": [{"role", "user", "content", prompt_classificador}],
+                "stream =": False,
+                "options =": {"temperature": 0}
+            }
+        )
+        resposta.raise_for_status() 
+        categoria = resposta.json()['mensagem']['conteudo'].strip()
+        return categoria.replace (" ' ", ""),('"', '')
+    except Exception:
+        return "Geral."
+
+def encontrarregras(conn, pergunta_vetor, nome_categoria, top_k=10):
+    cursor = conn.cursor()
+    sql_base = """
+    SELECT 
+    r.descricao_regra, 
+    r.exemplo, 
+    r.padrao_sintaxe
+    FROM regras_nomenclatura r
+    JOIN categorias_regras c ON r.id_categoria = c.id_categoria
+    """
+    if nome_categoria == "GERAL":
+        sql = sql_base + "order by r.embedding <=> %s::vector limit %s;"
+        parametros = (list(pergunta_vetor), top_k)
+    else:
+        sql = sql_base + """
+        where c.nome_categoria islike %s 
+        order by r.embedding <=> %s::vector 
+        limit %s;
+        """
+        parametros = (f"%{nome_categoria}", list(pergunta_vetor), top_k)
+    cursor.execute(sql, parametros)
+    return cursor.fetchall()
+
+def salvarrespotas(pergunta, categoria, resposta, nome_arquivo="historico_detran.txt"):
+    """
+    Salva a interação em um arquivo de texto (append mode).
+    Cria o arquivo se não existir.
+    """
+    timestamp  = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+    conteudo = (
+        f"========================================\n"
+        f"DATA: {timestamp}\n"
+        f"========================================\n"
+        f"CATEGORIA: {categoria}\n"
+        f"========================================\n"
+        f"PERGUNTA: {pergunta}\n"
+        f"========================================\n"
+        f"RESPOSTA:\n{resposta}\n"
+        f"========================================\n\n"
+    )
+    try:
+        with open(nome_arquivo, "a", encoding= "utf-8") as f:
+            f.write(conteudo)
+        print(f"\n[INFO] Resposta salva em '{nome_arquivo}'")
+    except Exception as e:
+        print(f"\n[ERRO] Não foi possível salvar o arquivo: {e}")
+
 def main():
     if len(sys.argv) < 2:
-        print('Uso correto: python perguntar_ao_manual.py "Sua pergunta entre aspas"')
+        print('Uso: python perguntar.py "Sua pergunta entre aspas"')
         return
     pergunta = sys.argv[1]
-
-    print(f" Analisando pergunta: '{pergunta}'")
 
     conn = conectadb()
     if not conn: return
 
+    print(f" Analisando a pergunta.")
+    categoria = classificarpergunta(pergunta)
+    print(f" Agente Especialista Acionado: [{categoria}]")
+
     vetor = embedtext(pergunta)
-    if not vetor: return
-
-    contexto = encontrarregras(conn, vetor)
+    
+    contexto = encontrarregras(conn, vetor, categoria)
+    
     if not contexto:
-        print(" Nenhuma regra relevante encontrada no banco.")
-
-        return
-    print(f"Regras recuperadas: {len(contexto)}")
+        
+        print(" Nada encontrado na vertical. Tentando busca global...")
+        contexto = encontrarregras(conn, vetor, "GERAL")
 
     perguntaollama(pergunta, contexto)
     conn.close()
-if __name__ == "__main__":
-
-    main()
